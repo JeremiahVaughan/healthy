@@ -1,0 +1,13 @@
+[Unit]
+Description=Health Monitor App
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/piegarden/healthy/app -c /home/piegarden/healthy/config.json
+
+Restart=on-failure
+User=root
+
+[Install]
+WantedBy=multi-user.target
