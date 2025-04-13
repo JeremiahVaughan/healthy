@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/home/piegarden/healthy/app -c /home/piegarden/healthy/config.json
+ExecStart=/home/piegarden/healthy/app -c /home/piegarden/healthy/config.json -d /home/piegarden/healthy-data
 
 Restart=on-failure
 User=root

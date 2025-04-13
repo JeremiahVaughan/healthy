@@ -1,0 +1,85 @@
+{{ define "base" }}
+<!DOCTYPE html>                                                   
+<html>                                                            
+<head>                                                            
+   <meta charset="utf-8">                                        
+   <script type="module">                                        
+       import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@latest/dist/mermaid.esm.min.mjs';                                                                     
+       mermaid.initialize({ startOnLoad: true });                
+   </script>                                                     
+   <style>                                                       
+     .mermaid { background: #f9f9f9; }                           
+   </style>                                                      
+   {{ if .LocalMode }}
+   <script defer>
+       const hotReloadPath = `/hotreload`
+       console.log(`Hot reload initializing @ ${hotReloadPath}`)
+       if (typeof(EventSource) !== "undefined") {
+         const es = new EventSource(hotReloadPath);
+         es.onmessage = function(event) {
+           console.log("code change detected, reloading. Event:", event);                                              
+           location.reload();
+         }
+         es.onerror = function(err) {
+           console.log("lost connection to server, reloading");
+           setTimeout(() => {
+             location.reload();
+           }, 500);
+         };
+         console.log("Hot reload initialized");                                              
+       }
+   </script>
+   {{ end }}
+</head>                                                           
+<body>                                                            
+   <div class="mermaid">                                         
+block-beta
+    columns 4
+    space
+    user(("User")):2
+    space
+    space:4
+    cloudflare["Cloudflare Proxy"]:2
+    terminalType["TerminalType"]
+    ttData[("sqlite")]
+    terminalType --> ttData
+    user --> cloudflare
+    user --> terminalType
+    space:4
+    ha["HA-Proxy"]:4
+    space:4
+    cloudflare --> ha
+    healthy
+    strengthgadget
+    block:soulshare:2
+        columns 4
+        api
+        share 
+        pubsub
+        upload
+        hooks 
+        ytimg 
+    end
+    space:4
+    space
+    sqliteStrength[("sqlite")]
+    strengthgadget --> sqliteStrength
+    ha --> strengthgadget
+    ha --> healthy
+    ha --> soulshare
+    cassandra[("cassandra")]
+    db[("postgres")]
+    soulshare --> db
+    soulshare --> cassandra
+    space
+    space:4
+    jobby
+    nats
+    space:2
+    space:4
+    bitBunker[("bucket")]
+    jobby --> bitBunker
+       </div>                                                        
+</body>                                                           
+</html>                                                           
+{{ end }}
