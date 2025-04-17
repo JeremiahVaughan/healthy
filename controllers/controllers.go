@@ -9,11 +9,13 @@ import (
 type Controllers struct {
     InfraGraph *InfraGraphController
     TemplateLoader *ui_util.TemplateLoader
+    Health *HealthController
 }
 
 func New(views *views.Views, models *models.Models) *Controllers { 
     return &Controllers{
         InfraGraph: NewInfraGraphController(views, models.UnexpectedErrors),
         TemplateLoader: views.TemplateLoader,
+        Health: NewHealthController(),
     }
 }

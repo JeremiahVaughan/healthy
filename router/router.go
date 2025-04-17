@@ -15,6 +15,7 @@ func New(controllers *controllers.Controllers) *Router {
     mux := http.NewServeMux()
     mux.HandleFunc("/infra-graph", controllers.InfraGraph.Graph)
     mux.HandleFunc("/hotreload", controllers.TemplateLoader.HandleHotReload)
+    mux.HandleFunc("/health", controllers.Health.Check)
     return &Router{ 
         mux: mux,
     }
