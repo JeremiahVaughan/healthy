@@ -21,15 +21,10 @@ func main() {
         "config/config.json",
         "location of config file",
     ) 
-    var databaseLocation string
-    flag.StringVar(
-        &databaseLocation,
-        "d",
-        "tmp/healthDatabase",
-        "location of sqlite database file directory",
-    ) 
 
-    config, err := config.New(configPath, databaseLocation)
+    flag.Parse()
+
+    config, err := config.New(configPath)
     if err != nil {
         log.Fatalf("error, when creating new config for main(). Error: %v", err)
     }
@@ -39,7 +34,7 @@ func main() {
         log.Fatalf("error, when creating clients for main(). Error: %v", err)
     }
 
-    views, err := views.New(config.LocalMode)
+    views, err := views.New(config.LocalMode, config.UiPath)
     if err != nil {
         log.Fatalf("error, when creating views for main(). Error: %v", err)
     }

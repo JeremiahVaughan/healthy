@@ -8,7 +8,13 @@
        mermaid.initialize({ startOnLoad: true });                
    </script>                                                     
    <style>                                                       
-     .mermaid { background: #f9f9f9; }                           
+     .mermaid { 
+         margin: 0 auto;
+         width: 30%;
+     }
+     body {
+         margin: 0;
+     }
    </style>                                                      
    {{ if .LocalMode }}
    <script defer>
@@ -71,12 +77,13 @@ block-beta
     db[("postgres")]
     soulshare --> db
     soulshare --> cassandra
+    space:4
+    nats
+    jobby
+    maint
     space
     space:4
-    jobby
-    nats
-    space:2
-    space:4
+    space
     bitBunker[("bucket")]
     jobby --> bitBunker
        </div>                                                        

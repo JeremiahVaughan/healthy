@@ -1,5 +1,22 @@
 set -e
-GOOS=linux GOARCH=arm64 go build -o ./deploy/app
-rsync -avz --delete -e ssh ./deploy/ ./ui deploy.target:$HOME/healthy
-ssh deploy.target "$HOME/healthy/remote-deploy.sh"
+
+DEST=$1
+APP=healthy
+
+DEPLOY_PATH="${HOME}/deploy/${APP}"
+
+if [ "$DEST" = "remote" ]; then            
+    GOOS=linux GOARCH=arm64 go build -o ./deploy/app
+    REMOTE_HOST="deploy.target"                                                     
+    REMOTE_PATH="${REMOTE_HOST}:${DEPLOY_PATH}"                     
+    rsync -avz --delete -e ssh ./deploy/ ./ui ./migrate "$REMOTE_PATH"
+    ssh pi3 "${DEPLOY_PATH}/remote-deploy.sh"
+else                                                                  
+    GOOS=linux GOARCH=amd64 go build -o ./deploy/app
+    LOCAL_PATH="${DEPLOY_PATH}"                               
+    rsync -avz --delete ./deploy/ ./ui ./migrate "$LOCAL_PATH"
+    "${DEPLOY_PATH}/remote-deploy.sh"
+fi                                                                    
+
+
 

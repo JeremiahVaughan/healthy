@@ -6,4 +6,6 @@ Deploy:
 See logs:
 ```journalctl -u healthy.service```
 
+Turn off deployed service:
+```sudo systemctl start healthy.service```
 

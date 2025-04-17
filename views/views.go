@@ -11,15 +11,15 @@ type Views struct {
     TemplateLoader *ui_util.TemplateLoader
 }
 
-func New(localMode bool) (*Views, error) { 
+func New(localMode bool, uiPath string) (*Views, error) { 
     templates := []ui_util.HtmlTemplate{
         {
             Name: "base",
         },
     }
     tl, err := ui_util.NewTemplateLoader(
-        "ui/templates/base",
-        "ui/templates/overrides",
+        uiPath + "/templates/base",
+        uiPath + "/templates/overrides",
         templates,
         localMode,
     )

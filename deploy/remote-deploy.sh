@@ -1,4 +1,7 @@
-sudo cp $HOME/healthy/healthy.service /etc/systemd/system/healthy.service
-sudo systemctl enable healthy.service
-sudo systemctl start healthy.service
-sudo systemctl restart healthy.service
+APP=healthy
+
+set -e
+sudo cp "$HOME/deploy/${APP}/${APP}.service" "/etc/systemd/system/${APP}.service"
+sudo systemctl enable "${APP}.service"
+sudo systemctl start "${APP}.service"
+sudo systemctl restart "${APP}.service"
