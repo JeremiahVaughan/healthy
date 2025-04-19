@@ -10,12 +10,14 @@ type Controllers struct {
     InfraGraph *InfraGraphController
     TemplateLoader *ui_util.TemplateLoader
     Health *HealthController
+    HealthStatus *HealthStatusController
 }
 
-func New(views *views.Views, models *models.Models) *Controllers { 
+func New(views *views.Views, models *models.Models, statusRefreshIntervalInSeconds int64) *Controllers { 
     return &Controllers{
-        InfraGraph: NewInfraGraphController(views, models.UnexpectedErrors),
+        InfraGraph: NewInfraGraphController(views, models.HealthStatus),
         TemplateLoader: views.TemplateLoader,
         Health: NewHealthController(),
+        HealthStatus: NewHealthStatusController(views, models, statusRefreshIntervalInSeconds),
     }
 }

@@ -1,0 +1,56 @@
+{{ define "head" }}
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: solid 1px #666969;
+            padding: .7rem;
+        }
+        tr:hover {
+            background-color: #ffffb3;
+        }
+    </style>
+{{ end }}
+
+{{ define "content" }}
+    <table>
+        <thead>
+            <tr>
+                {{ range .TableHeaders }}
+                    <th>
+                        {{ . }}
+                    </th>
+                {{ end }}
+            </tr>
+        </thead>
+        <tbody>
+            {{ range .TableRows }}
+                <tr>
+                    <td>
+                        {{ .Service }}
+                    </td>
+                    <td>
+                        {{ .StatusKey }}
+                    </td>
+                    <td>
+                        {{ .Unhealthy }}
+                    </td>
+                    <td>
+                        {{ .UnhealthyStartedAt }}
+                    </td>
+                    <td>
+                        {{ .UnhealthyDelayInSeconds }}
+                    </td>
+                    <td>
+                        {{ .Message }}
+                    </td>
+                    <td>
+                        {{ .ExpiresAt }}
+                    </td>
+                </tr>
+            {{ end }}
+        </tbody>
+    </table>
+{{ end }}

@@ -12,6 +12,8 @@ type Config struct {
     Nats Nats `json:"nats"`
     UiPath string `json:"uiPath"`
     Database Database `json:"database"`
+    HealthStatusExpiresDurationInSeconds int64 `json:"healthStatusExpiresDurationInSeconds"`
+    StatusRefreshIntervalInSeconds int64 `json:"statusRefreshIntervalInSeconds"`
 }
 
 type Nats struct {
@@ -22,15 +24,6 @@ type Nats struct {
 type Database struct {
     DataDirectory string `json:"dataDirectory"`
     MigrationDirectory string `json:"migrationDirectory"`
-}
-
-type HealthStatus struct {
-    Service string `json:"service"`
-    StatusKey string `json:"statusKey"`
-    Unhealthy bool `json:"unhealthy"`
-    Message string `json:"message"`
-    UnhealthyAt int64 
-    UnhealthyDelayInSeconds int64 
 }
 
 func New(
@@ -66,14 +59,18 @@ func (c *Config) validate() error {
    if c.UiPath == "" {
        return errors.New("UI path required") 
    }
-                                                                     
+   
    if c.Database.DataDirectory == "" {                               
        return errors.New("Database dataDirectory must not be empty") 
    }                                                                 
                                                                      
    if c.Database.MigrationDirectory == "" {                          
-       return errors.New("Database migrationDirectory must not be  empty")                                                               
+       return errors.New("Database migrationDirectory must not be empty")
    }                                                                 
+
+   if c.HealthStatusExpiresDurationInSeconds == 0 {
+       return errors.New("must provide a healthStatusExpiresDurationInSeconds value")
+   }
                                                                      
    return nil                                                        
 }                                                                     

@@ -1,0 +1,70 @@
+{{ define "head" }}
+   <script type="module">                                        
+       import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@latest/dist/mermaid.esm.min.mjs';                                                                     
+       mermaid.initialize({ startOnLoad: true });                
+   </script>                                                     
+   <style>                                                       
+     .mermaid { 
+         margin: 0 auto;
+         width: 30%;
+     }
+     body {
+         margin: 0;
+     }
+   </style>                                                      
+{{ end }}
+{{ define "content" }}
+    <body>                                                            
+       <div class="mermaid">                                         
+    block-beta
+        columns 4
+        space
+        user(("User")):2
+        space
+        space:4
+        cloudflare["Cloudflare Proxy"]:2
+        terminalType["TerminalType\n:22"]
+        ttData[("sqlite")]
+        terminalType --> ttData
+        user --> cloudflare
+        user --> terminalType
+        space:4
+        ha["HA-Proxy\n:443"]:4
+        space:4
+        cloudflare --> ha
+        healthy["healthy\n:7777"]
+        strengthgadget["strengthgadget\n:8080"]
+        block:soulshare:2
+            columns 4
+            api
+            share
+            pubsub
+            upload
+            hooks 
+            ytimg 
+            ports["80-85"]
+        end
+        space:4
+        sqliteHealthy[("sqlite")]
+        healthy --> sqliteHealthy
+        sqliteStrength[("sqlite")]
+        strengthgadget --> sqliteStrength
+        ha --> strengthgadget
+        ha --> healthy
+        ha --> soulshare
+        cassandra[("cassandra")]
+        db[("postgres")]
+        soulshare --> db
+        soulshare --> cassandra
+        space:4
+        nats["nats\n:3000"]
+        jobby
+        maint["maint\n:8000"]
+        space
+        space:4
+        space
+        bitBunker[("bucket")]
+        jobby --> bitBunker
+           </div>                                                        
+    </body>                                                           
+{{ end }}

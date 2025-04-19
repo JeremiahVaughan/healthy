@@ -20,7 +20,7 @@ func NewInfraGraphView(tl *ui_util.TemplateLoader, localMode bool) *InfraGraphVi
 }
 
 func (i *InfraGraphView) Render(w http.ResponseWriter) error {
-    err := i.tl.GetTemplateGroup("base").ExecuteTemplate(w, "base", i)
+    err := i.tl.GetTemplateGroup("infra-graph").ExecuteTemplate(w, "base", i)
     if err != nil {
         return fmt.Errorf("error, when rendering template for InfraGraphView.Render(). Error: %v", err)
     }

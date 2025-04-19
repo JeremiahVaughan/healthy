@@ -10,21 +10,21 @@ import (
 
 type InfraGraphController struct {
     view *views.InfraGraphView
-    errModel *models.UnexpectedErrorsModel
+    errModel *models.HealthStatusModel
 }
 
-func NewInfraGraphController(views *views.Views, errModel *models.UnexpectedErrorsModel) *InfraGraphController { 
+func NewInfraGraphController(views *views.Views, errModel *models.HealthStatusModel) *InfraGraphController { 
     return &InfraGraphController{
         view: views.InfraGraph,
         errModel: errModel,
     }
 }
 
-func (i *InfraGraphController) Graph(w http.ResponseWriter, r *http.Request) {
-    err := i.view.Render(w)
+func (c *InfraGraphController) Graph(w http.ResponseWriter, r *http.Request) {
+    err := c.view.Render(w)
     if err != nil {
         err = fmt.Errorf("error, when rendering view for infra graph. Error: %v", err)
-        i.errModel.Internal(err) 
+        c.errModel.InternalUnexpectedError(err) 
         return
     }
 }

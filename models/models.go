@@ -2,17 +2,15 @@ package models
 
 import (
     "github.com/JeremiahVaughan/healthy/clients"
+    "github.com/JeremiahVaughan/healthy/config"
 )
 
 type Models struct {
-    UnexpectedErrors *UnexpectedErrorsModel
-    // UpdateHealthStatus *UpdateHealthStatusModel
-    // CheckHealthStatus *CheckHealthStatusModel
+    HealthStatus *HealthStatusModel
 }
 
-func New(clients *clients.Clients) *Models {
-    // todo implement
+func New(clients *clients.Clients, config config.Config) *Models {
     return &Models{
-        UnexpectedErrors: NewUnexpectedErrorsModel(),
+        HealthStatus: NewHealthStatusModel(clients, config),
     }
 }

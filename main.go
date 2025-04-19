@@ -2,6 +2,7 @@ package main
 
 import (
     "flag"
+    "context"
     "log"
 
     "github.com/JeremiahVaughan/healthy/config"
@@ -13,6 +14,8 @@ import (
 )
 
 func main() {
+    ctx := context.Background()
+
     log.Println("healthy is starting")
     var configPath string
     flag.StringVar(
@@ -34,16 +37,16 @@ func main() {
         log.Fatalf("error, when creating clients for main(). Error: %v", err)
     }
 
-    views, err := views.New(config.LocalMode, config.UiPath)
+    models := models.New(clients, config)
+    views, err := views.New(config.LocalMode, config.UiPath, models)
     if err != nil {
         log.Fatalf("error, when creating views for main(). Error: %v", err)
     }
-    models := models.New(clients)
-    controllers := controllers.New(views, models)
-    router := router.New(controllers)
+    controllers := controllers.New(views, models, config.StatusRefreshIntervalInSeconds)
+    router := router.New(controllers, clients)
 
     log.Println("healthy is running")
-    err = router.Run()
+    err = router.Run(ctx)
     if err != nil {
         log.Fatalf("error, when starting router. Error: %v", err)
     }

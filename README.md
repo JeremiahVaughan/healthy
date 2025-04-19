@@ -7,5 +7,5 @@ See logs:
 ```journalctl -u healthy.service```
 
 Turn off deployed service:
-```sudo systemctl start healthy.service```
+```sudo systemctl stop healthy.service```
 
