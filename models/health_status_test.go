@@ -24,7 +24,7 @@ func Test_mergeHealthStatuses(t *testing.T) {
             UnhealthyDelayInSeconds: 5,
             Unhealthy: true,
         }
-        mergedStatus := m.mergeHealthStatuses(oldStatus, newStatus, currentTime)
+        mergedStatus := m.mergeHealthStatuses(&oldStatus, newStatus, currentTime)
         if mergedStatus.Message != "oh noes" {
             t.Errorf("error, expected message not found. Message: %s", mergedStatus.Message)
         }
@@ -51,7 +51,7 @@ func Test_mergeHealthStatuses(t *testing.T) {
             UnhealthyDelayInSeconds: 5,
             Unhealthy: false,
         }
-        mergedStatus := m.mergeHealthStatuses(oldStatus, newStatus, currentTime)
+        mergedStatus := m.mergeHealthStatuses(&oldStatus, newStatus, currentTime)
         if mergedStatus.Message != "nothing to report ok?" {
             t.Errorf("error, expected message not found. Message: %s", mergedStatus.Message)
         }
@@ -78,7 +78,7 @@ func Test_mergeHealthStatuses(t *testing.T) {
             UnhealthyDelayInSeconds: 5,
             Unhealthy: true,
         }
-        mergedStatus := m.mergeHealthStatuses(oldStatus, newStatus, currentTime)
+        mergedStatus := m.mergeHealthStatuses(&oldStatus, newStatus, currentTime)
         if mergedStatus.Message != "really not good" {
             t.Errorf("error, expected message not found. Message: %s", mergedStatus.Message)
         }
@@ -105,8 +105,50 @@ func Test_mergeHealthStatuses(t *testing.T) {
             UnhealthyDelayInSeconds: 5,
             Unhealthy: false,
         }
-        mergedStatus := m.mergeHealthStatuses(oldStatus, newStatus, currentTime)
+        mergedStatus := m.mergeHealthStatuses(&oldStatus, newStatus, currentTime)
         if mergedStatus.Message != "good again" {
+            t.Errorf("error, expected message not found. Message: %s", mergedStatus.Message)
+        }
+        if mergedStatus.UnhealthyDelayInSeconds != 5 {
+            t.Errorf("error, delay was not updated. Found delay: %d", mergedStatus.UnhealthyDelayInSeconds)
+        }
+        if mergedStatus.ExpiresAt != 8 {
+            t.Errorf("error, expected expires at to be 8, but it was: %d", mergedStatus.ExpiresAt)
+        }
+        if mergedStatus.UnhealthyStartedAt != 0 {
+            t.Errorf("error, expected unhealthy started at of 0 but got %d", mergedStatus.UnhealthyStartedAt)
+        }
+    })
+
+    t.Run("old status doesn't exist, new status not healthy", func(t *testing.T){
+        newStatus := database.HealthStatus{
+            Message: "not good",
+            UnhealthyDelayInSeconds: 5,
+            Unhealthy: true,
+        }
+        mergedStatus := m.mergeHealthStatuses(nil, newStatus, currentTime)
+        if mergedStatus.Message != "not good" {
+            t.Errorf("error, expected message not found. Message: %s", mergedStatus.Message)
+        }
+        if mergedStatus.UnhealthyDelayInSeconds != 5 {
+            t.Errorf("error, delay was not updated. Found delay: %d", mergedStatus.UnhealthyDelayInSeconds)
+        }
+        if mergedStatus.ExpiresAt != 8 {
+            t.Errorf("error, expected expires at to be 8, but it was: %d", mergedStatus.ExpiresAt)
+        }
+        if mergedStatus.UnhealthyStartedAt != currentTime {
+            t.Errorf("error, expected unhealthy started at of %d but got %d", currentTime, mergedStatus.UnhealthyStartedAt)
+        }
+    })
+
+    t.Run("old status doesn't exist, new status is healthy", func(t *testing.T){
+        newStatus := database.HealthStatus{
+            Message: "good",
+            UnhealthyDelayInSeconds: 5,
+            Unhealthy: false,
+        }
+        mergedStatus := m.mergeHealthStatuses(nil, newStatus, currentTime)
+        if mergedStatus.Message != "good" {
             t.Errorf("error, expected message not found. Message: %s", mergedStatus.Message)
         }
         if mergedStatus.UnhealthyDelayInSeconds != 5 {

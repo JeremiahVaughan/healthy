@@ -35,6 +35,7 @@ func New(controllers *controllers.Controllers, clients *clients.Clients) *Router
     mux.HandleFunc("/infra-graph", controllers.InfraGraph.Graph)
     mux.HandleFunc("/dash", controllers.HealthStatus.Dashboard)
     mux.HandleFunc("/healthStatusCheck", controllers.HealthStatus.Check)
+    mux.HandleFunc("/clearUnexpectedErrors", controllers.HealthStatus.ClearUnexpectedErrors)
     mux.HandleFunc("/hotreload", controllers.TemplateLoader.HandleHotReload)
     mux.HandleFunc("/health", controllers.Health.Check)
 

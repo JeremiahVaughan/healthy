@@ -8,3 +8,5 @@ CREATE TABLE health_status (
     PRIMARY KEY (service, status_key)
 );
 
+CREATE INDEX index_status_key ON health_status (status_key);
+

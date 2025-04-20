@@ -81,6 +81,12 @@ func (c *Client) InsertHealthStatus(status HealthStatus) error {
             ?,
             ?
         )`,
+        status.Service,
+        status.StatusKey,
+        status.UnhealthyStartedAt,
+        status.UnhealthyDelayInSeconds,
+        status.Message,
+        status.ExpiresAt,
     )
     if err != nil {
         return fmt.Errorf("error, when creating health status. Error: %v", err)
@@ -101,6 +107,8 @@ func (c *Client) UpdateHealthStatus(status HealthStatus) error {
         status.UnhealthyDelayInSeconds,
         status.Message,
         status.ExpiresAt,
+        status.Service,
+        status.StatusKey,
     )
     if err != nil {
         return fmt.Errorf("error, when creating health status. Error: %v", err)
@@ -113,6 +121,8 @@ func (c *Client) DeleteHealthStatus(status HealthStatus) error {
         `DELETE FROM health_status
         WHERE service = ? 
             AND status_key = ?`,
+        status.Service,
+        status.StatusKey,
     )
     if err != nil {
         return fmt.Errorf("error, when creating health status. Error: %v", err)
@@ -122,8 +132,7 @@ func (c *Client) DeleteHealthStatus(status HealthStatus) error {
 
 func (c *Client) ClearUnexpected() error {
     _, err := c.conn.Exec(
-        `UPDATE health_status
-        SET unhealthy_started_at = 0
+        `DELETE FROM health_status
         WHERE status_key IN (?, ?)`,
         InternalUnexpectedErrorKey,
         ExternalUnexpectedErrorKey,

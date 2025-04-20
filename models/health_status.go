@@ -42,17 +42,17 @@ func (m *HealthStatusModel) UpdateHealthStatus(newStatus database.HealthStatus) 
     if err != nil {
         return fmt.Errorf("error, when fetching existing health status for HealthStatusModel.UpdateHealthStatus(). Error: %v", err)
     }
+    merged := m.mergeHealthStatuses(
+        existing,
+        newStatus,
+        time.Now().Unix(),
+    )    
     if existing == nil {
-        err = m.db.InsertHealthStatus(newStatus)
+        err = m.db.InsertHealthStatus(merged)
         if err != nil {
             return fmt.Errorf("error, when inserting new health status for HealthStatusModel.UpdateHealthStatus(). Error: %v", err)
         }
     } else {
-        merged := m.mergeHealthStatuses(
-            *existing,
-            newStatus,
-            time.Now().Unix(),
-        )    
         err = m.db.UpdateHealthStatus(merged)
         if err != nil {
             return fmt.Errorf("error, when updating existing health status for HealthStatusModel.UpdateHealthStatus(). Error: %v", err)
@@ -72,7 +72,7 @@ func (m *HealthStatusModel) DeleteHealthStatus(status database.HealthStatus) err
 }
 
 func (m *HealthStatusModel) mergeHealthStatuses(
-    existingStatus database.HealthStatus,
+    existingStatus *database.HealthStatus,
     newStatus database.HealthStatus,
     currentTime int64,
 ) database.HealthStatus {
@@ -84,7 +84,7 @@ func (m *HealthStatusModel) mergeHealthStatuses(
         ExpiresAt: currentTime + m.healthStatusExpiresDurationInSeconds,
     }
     if newStatus.Unhealthy {
-        if existingStatus.UnhealthyStartedAt == 0 {
+        if existingStatus == nil || existingStatus.UnhealthyStartedAt == 0 {
             mergedStatus.UnhealthyStartedAt = currentTime
         } else {
             mergedStatus.UnhealthyStartedAt = existingStatus.UnhealthyStartedAt

@@ -4,6 +4,7 @@ import (
     "fmt"
     "encoding/json"
     "log"
+    "net/http"
 
     "github.com/nats-io/nats.go"
 )
@@ -59,25 +60,30 @@ func New(
     if err != nil {
         return nil, fmt.Errorf("error, when connecting to nats service for client init. Error: %v", err)
     }
-    result.Sub, err = result.Conn.Subscribe("refresh-all-health-statuses", result.handle)
+    key := getRefreshStatusKey(serviceName)
+    result.Sub, err = result.Conn.Subscribe(key, result.handle)
     if err != nil {
         return nil, fmt.Errorf("error, when subscribing to refresh-all-health-statuses. Error: %v", err)
     }
     return &result, nil
 }
 
+func getRefreshStatusKey(serviceName string) string {
+    return fmt.Sprintf("refresh-all-health-statuses:%s", serviceName) 
+}
+
 func (c *Client) handle(msg *nats.Msg) {
     var s HealthStatus
-    err := json.Unmarshal(msg.Data, s)
+    err := json.Unmarshal(msg.Data, &s)
     if err != nil {
         err = fmt.Errorf("error, when decoding status from healthy. Error: %v", err)
-        c.ReportUnexpectedError(err)
+        c.ReportUnexpectedError(nil, err)
         return
     }
     err = c.updateRefreshStatus(s)
     if err != nil {
         err = fmt.Errorf("error, when handling refresh status for status: %s. Error: %v", s.StatusKey, err)
-        c.ReportUnexpectedError(err)
+        c.ReportUnexpectedError(nil, err)
         return
     }
 }
@@ -87,13 +93,17 @@ func (c *Client) Close() {
     err := c.Sub.Unsubscribe()
     if err != nil {
         err = fmt.Errorf("error, when unsubscribing from healthy nats. Error: %v", err)
-        c.ReportUnexpectedError(err)
+        c.ReportUnexpectedError(nil, err)
         return
     }
     c.Conn.Close()
 }
 
-func (c *Client) ReportUnexpectedError(err error) {
+func (c *Client) ReportUnexpectedError(w http.ResponseWriter, err error) {
+    log.Println(err.Error())
+	if w != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
     s := HealthStatus{
         Service: c.serviceName,
         Message: err.Error(),
@@ -114,13 +124,13 @@ func (c *Client) PublishHealthStatus(status HealthStatus) {
     bytes, err := json.Marshal(status)
     if err != nil {
         err = fmt.Errorf("error, when encoding health status for key: %s. Error: %v", status.StatusKey, err)
-        c.ReportUnexpectedError(err)
+        c.ReportUnexpectedError(nil, err)
         return
     }
     err = c.Conn.Publish("update-health-status", bytes)    
     if err != nil {
         err = fmt.Errorf("error, when updating health status for key: %s. Error: %v", status.StatusKey, err)
-        c.ReportUnexpectedError(err)
+        c.ReportUnexpectedError(nil, err)
         return
     }
 }

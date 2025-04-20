@@ -64,6 +64,11 @@ func (c *HealthStatusController) UpdateHealthStatus(msg *nats.Msg) {
         return
     }
     err = c.model.UpdateHealthStatus(s)
+    if err != nil {
+        err = fmt.Errorf("error, when UpdateHealthStatus for HealthStatusController.UpdateHealthStatus(). Error: %v", err)
+        c.model.InternalUnexpectedError(err)
+        return
+    }
 }
 
 func (c *HealthStatusController) ReportUnexpectedError(msg *nats.Msg) {
@@ -77,6 +82,16 @@ func (c *HealthStatusController) ReportUnexpectedError(msg *nats.Msg) {
     c.model.ExternalUnexpectedError(s)
 }
 
+func (c *HealthStatusController) ClearUnexpectedErrors(w http.ResponseWriter, r *http.Request) {
+    err := c.model.ClearUnexpectedErrorStatuses()
+    if err != nil {
+        err = fmt.Errorf("error, when ClearUnexpectedErrorStatuses() for HealthStatusController.ClearUnexpectedErrors(). Error: %v", err)
+        c.model.InternalUnexpectedError(err)
+        return
+    }
+}
+
+
 func (c *HealthStatusController) RefreshAll(ctx context.Context) {
     for {
         select {
@@ -88,13 +103,18 @@ func (c *HealthStatusController) RefreshAll(ctx context.Context) {
                 continue
             }
             for _, s := range statuses {
+                switch s.StatusKey {
+                case database.InternalUnexpectedErrorKey, database.ExternalUnexpectedErrorKey:
+                    continue
+                }
                 bytes, err := json.Marshal(s)
                 if err != nil {
                     err = fmt.Errorf("error, when marshaling status for HealthStatusController.RefreshAll(). Error: %v", err)
                     c.model.InternalUnexpectedError(err)
                     continue
                 }
-                err = c.model.RefreshStatus(c.RefreshAllKey, bytes)
+                key := c.getRefreshStatusKey(s.Service)
+                err = c.model.RefreshStatus(key, bytes)
                 if err != nil {
                     err = fmt.Errorf("error, when RefreshStatus() for HealthStatusController.RefreshAll(). Error: %v", err)
                     c.model.InternalUnexpectedError(err)
@@ -104,4 +124,8 @@ func (c *HealthStatusController) RefreshAll(ctx context.Context) {
         case <- ctx.Done():
         }
     }
+}
+
+func (c *HealthStatusController) getRefreshStatusKey(serviceName string) string {
+    return fmt.Sprintf("%s:%s", c.RefreshAllKey, serviceName) 
 }

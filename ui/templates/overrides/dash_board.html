@@ -11,6 +11,22 @@
         tr:hover {
             background-color: #ffffb3;
         }
+        .status-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .status {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 3rem;
+        }
+        .status-green {
+            background-color: #00ff00;
+        }
+        .status-red {
+            background-color: #ff0000;
+        }
     </style>
 {{ end }}
 
@@ -35,7 +51,9 @@
                         {{ .StatusKey }}
                     </td>
                     <td>
-                        {{ .Unhealthy }}
+                        <div class="status-container">
+                            <div class="status status-{{ if eq .Unhealthy true }}red{{else}}green{{end}}"></div>
+                        </div>
                     </td>
                     <td>
                         {{ .UnhealthyStartedAt }}

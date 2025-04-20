@@ -43,7 +43,7 @@ func (i *DashBoardView) Render(w http.ResponseWriter) error {
         TableHeaders: []string{
             "Service",
             "Status Key",
-            "Unhealthy",
+            "Status",
             "Unhealthy Started At",
             "Unhealthy Delay In Seconds",
             "Message",
