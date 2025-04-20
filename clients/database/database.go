@@ -183,7 +183,8 @@ func (c *Client) FetchAllHealthStatuses() ([]HealthStatus, error) {
                 unhealthy_delay_in_seconds,
                 message,
                 expires_at
-        FROM health_status`,
+        FROM health_status
+        ORDER by unhealthy_started_at DESC`,
     )
 
     defer func(rows *sql.Rows) {

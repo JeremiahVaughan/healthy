@@ -65,7 +65,7 @@ func NewTemplateLoader(
 	return &tl, nil
 }
 
-func InitStaticFiles(mux http.ServeMux, staticFilesPath string) {
+func InitStaticFiles(mux *http.ServeMux, staticFilesPath string) {
     mux.Handle(
         "/static/",
         http.StripPrefix(

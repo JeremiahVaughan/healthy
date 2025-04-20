@@ -8,6 +8,8 @@ import (
     "github.com/JeremiahVaughan/healthy/controllers"
     natsClient "github.com/JeremiahVaughan/healthy/clients/nats"
     "github.com/JeremiahVaughan/healthy/clients"
+    "github.com/JeremiahVaughan/healthy/config"
+    "github.com/JeremiahVaughan/healthy/ui_util"
 
     "github.com/nats-io/nats.go"
 )
@@ -30,14 +32,22 @@ type Subscription struct {
     sub *nats.Subscription
 }
 
-func New(controllers *controllers.Controllers, clients *clients.Clients) *Router {
+func New(
+    controllers *controllers.Controllers,
+    clients *clients.Clients,
+    config config.Config,
+) *Router {
     mux := http.NewServeMux()
     mux.HandleFunc("/infra-graph", controllers.InfraGraph.Graph)
     mux.HandleFunc("/dash", controllers.HealthStatus.Dashboard)
     mux.HandleFunc("/healthStatusCheck", controllers.HealthStatus.Check)
     mux.HandleFunc("/clearUnexpectedErrors", controllers.HealthStatus.ClearUnexpectedErrors)
-    mux.HandleFunc("/hotreload", controllers.TemplateLoader.HandleHotReload)
+    if config.LocalMode {
+        mux.HandleFunc("/hotreload", controllers.TemplateLoader.HandleHotReload)
+    }
     mux.HandleFunc("/health", controllers.Health.Check)
+
+    ui_util.InitStaticFiles(mux, config.UiPath + "/static")
 
     subs := []Subscription{
         {

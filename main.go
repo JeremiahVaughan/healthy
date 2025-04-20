@@ -43,7 +43,7 @@ func main() {
         log.Fatalf("error, when creating views for main(). Error: %v", err)
     }
     controllers := controllers.New(views, models, config.StatusRefreshIntervalInSeconds)
-    router := router.New(controllers, clients)
+    router := router.New(controllers, clients, config)
 
     log.Println("healthy is running")
     err = router.Run(ctx)
