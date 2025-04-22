@@ -23,7 +23,7 @@
         space
         space:4
         cloudflare["Cloudflare Proxy"]:2
-        terminalType["TerminalType\n:22"]
+        terminalType["TerminalType\n:22\n:9001"]
         ttData[("sqlite")]
         terminalType --> ttData
         user --> cloudflare
@@ -33,7 +33,7 @@
         space:4
         cloudflare --> ha
         healthy["healthy\n:7777"]
-        strengthgadget["strengthgadget\n:8080"]
+        strengthgadget["strengthgadget\n:9000"]
         block:soulshare:2
             columns 4
             api
@@ -58,7 +58,7 @@
         soulshare --> cassandra
         space:4
         nats["nats\n:3000"]
-        jobby
+        jobby["jobby\n:6666"]
         maint["maint\n:8000"]
         space
         space:4
