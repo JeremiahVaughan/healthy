@@ -6,7 +6,7 @@ import (
     "log"
     "net/http"
 
-    "github.com/JeremiahVaughan/jobby/config"
+    "github.com/JeremiahVaughan/healthy/example/config"
     "github.com/nats-io/nats.go"
 )
 

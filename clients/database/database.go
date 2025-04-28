@@ -26,7 +26,7 @@ type Client struct {
 type HealthStatus struct {
     Service string `json:"service"`
     StatusKey string `json:"statusKey"`
-    Unhealthy bool `json:"unhealthy"`
+    Healthy bool `json:"healthy"`
     UnhealthyStartedAt int64 `json:"unhealthyStartedAt"`
     // UnhealthyDelayInSeconds this many seconds will pass with an unhealthy status of true before status cake is triggered
     UnhealthyDelayInSeconds int64 `json:"unhealthyDelayInSeconds"` 
@@ -95,6 +95,7 @@ func (c *Client) InsertHealthStatus(status HealthStatus) error {
 }
 
 func (c *Client) UpdateHealthStatus(status HealthStatus) error {
+    log.Printf("todo remove, recording message: %v", status)
     _, err := c.conn.Exec(
         `UPDATE health_status
         SET unhealthy_started_at = ?,
@@ -229,13 +230,14 @@ func (c *Client) FetchAllHealthStatuses() ([]HealthStatus, error) {
 }
 
 func (s *HealthStatus) calculateUnhealthy(currentTime int64) {
+    s.Healthy = true
     if s.ExpiresAt <= currentTime && (s.StatusKey != ExternalUnexpectedErrorKey && s.StatusKey != InternalUnexpectedErrorKey) {
         s.Message = "alert status is expired"
         s.UnhealthyStartedAt = s.ExpiresAt
-        s.Unhealthy = true
+        s.Healthy = false
     } else if s.UnhealthyStartedAt != 0 {
         if s.UnhealthyStartedAt + s.UnhealthyDelayInSeconds < currentTime {
-            s.Unhealthy = true
+            s.Healthy = false
         } else {
             s.Message = "" // nothing to report until unhealthy is determined
         }

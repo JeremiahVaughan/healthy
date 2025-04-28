@@ -14,8 +14,8 @@ func Test_calculateUnhealthy(t *testing.T) {
             ExpiresAt: 605,
         }
         status.calculateUnhealthy(currentTime)
-        if status.Unhealthy {
-            t.Errorf("error, should not be unhealthy but is")
+        if !status.Healthy {
+            t.Errorf("error, should be healthy but is not")
         }
     })
 
@@ -27,7 +27,7 @@ func Test_calculateUnhealthy(t *testing.T) {
             ExpiresAt: 4,
         }
         status.calculateUnhealthy(currentTime)
-        if !status.Unhealthy {
+        if status.Healthy {
             t.Errorf("error, should be unhealthy but is not")
         }
         if status.UnhealthyStartedAt != 4 {
@@ -46,7 +46,7 @@ func Test_calculateUnhealthy(t *testing.T) {
             ExpiresAt: 4,
         }
         status.calculateUnhealthy(currentTime)
-        if !status.Unhealthy {
+        if status.Healthy {
             t.Errorf("error, should be unhealthy but is not")
         }
         if status.UnhealthyStartedAt != 4 {
@@ -65,8 +65,8 @@ func Test_calculateUnhealthy(t *testing.T) {
             ExpiresAt: 605,
         }
         status.calculateUnhealthy(currentTime)
-        if status.Unhealthy {
-            t.Errorf("error, should not be unhealthy until enough delay has passed")
+        if !status.Healthy {
+            t.Errorf("error, should be healthy still until enough delay has passed")
         }
         if status.UnhealthyStartedAt != 2 {
             t.Errorf("error, should be unhealthy started at 2 but is %d", status.UnhealthyStartedAt)
@@ -84,7 +84,7 @@ func Test_calculateUnhealthy(t *testing.T) {
             ExpiresAt: 605,
         }
         status.calculateUnhealthy(currentTime)
-        if !status.Unhealthy {
+        if status.Healthy {
             t.Errorf("error, should be unhealthy")
         }
         if status.UnhealthyStartedAt != 2 {
@@ -103,7 +103,7 @@ func Test_calculateUnhealthy(t *testing.T) {
             ExpiresAt: 605,
         }
         status.calculateUnhealthy(currentTime)
-        if !status.Unhealthy {
+        if status.Healthy {
             t.Errorf("error, should be unhealthy")
         }
         if status.UnhealthyStartedAt != 4 {
@@ -123,7 +123,7 @@ func Test_calculateUnhealthy(t *testing.T) {
             ExpiresAt: 2,
         }
         status.calculateUnhealthy(currentTime)
-        if !status.Unhealthy {
+        if status.Healthy {
             t.Errorf("error, should always be unhealthy")
         }
         if status.UnhealthyStartedAt != 1 {
@@ -143,7 +143,7 @@ func Test_calculateUnhealthy(t *testing.T) {
             ExpiresAt: 2,
         }
         status.calculateUnhealthy(currentTime)
-        if !status.Unhealthy {
+        if status.Healthy {
             t.Errorf("error, should always be unhealthy")
         }
         if status.UnhealthyStartedAt != 1 {

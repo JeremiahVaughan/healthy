@@ -16,13 +16,13 @@ func Test_mergeHealthStatuses(t *testing.T) {
         oldStatus := database.HealthStatus{
             Message: "nothing to report",
             UnhealthyDelayInSeconds: 4,
-            Unhealthy: false,
+            Healthy: true,
             UnhealthyStartedAt: 0,
         }
         newStatus := database.HealthStatus{
             Message: "oh noes",
             UnhealthyDelayInSeconds: 5,
-            Unhealthy: true,
+            Healthy: false,
         }
         mergedStatus := m.mergeHealthStatuses(&oldStatus, newStatus, currentTime)
         if mergedStatus.Message != "oh noes" {
@@ -43,13 +43,13 @@ func Test_mergeHealthStatuses(t *testing.T) {
         oldStatus := database.HealthStatus{
             Message: "nothing to report",
             UnhealthyDelayInSeconds: 4,
-            Unhealthy: false,
+            Healthy: true,
             UnhealthyStartedAt: 0,
         }
         newStatus := database.HealthStatus{
             Message: "nothing to report ok?",
             UnhealthyDelayInSeconds: 5,
-            Unhealthy: false,
+            Healthy: true,
         }
         mergedStatus := m.mergeHealthStatuses(&oldStatus, newStatus, currentTime)
         if mergedStatus.Message != "nothing to report ok?" {
@@ -70,13 +70,13 @@ func Test_mergeHealthStatuses(t *testing.T) {
         oldStatus := database.HealthStatus{
             Message: "not good",
             UnhealthyDelayInSeconds: 4,
-            Unhealthy: true,
+            Healthy: false,
             UnhealthyStartedAt: 3,
         }
         newStatus := database.HealthStatus{
             Message: "really not good",
             UnhealthyDelayInSeconds: 5,
-            Unhealthy: true,
+            Healthy: false,
         }
         mergedStatus := m.mergeHealthStatuses(&oldStatus, newStatus, currentTime)
         if mergedStatus.Message != "really not good" {
@@ -97,13 +97,13 @@ func Test_mergeHealthStatuses(t *testing.T) {
         oldStatus := database.HealthStatus{
             Message: "not good",
             UnhealthyDelayInSeconds: 4,
-            Unhealthy: true,
+            Healthy: false,
             UnhealthyStartedAt: 3,
         }
         newStatus := database.HealthStatus{
             Message: "good again",
             UnhealthyDelayInSeconds: 5,
-            Unhealthy: false,
+            Healthy: true,
         }
         mergedStatus := m.mergeHealthStatuses(&oldStatus, newStatus, currentTime)
         if mergedStatus.Message != "good again" {
@@ -124,7 +124,7 @@ func Test_mergeHealthStatuses(t *testing.T) {
         newStatus := database.HealthStatus{
             Message: "not good",
             UnhealthyDelayInSeconds: 5,
-            Unhealthy: true,
+            Healthy: false,
         }
         mergedStatus := m.mergeHealthStatuses(nil, newStatus, currentTime)
         if mergedStatus.Message != "not good" {
@@ -145,7 +145,7 @@ func Test_mergeHealthStatuses(t *testing.T) {
         newStatus := database.HealthStatus{
             Message: "good",
             UnhealthyDelayInSeconds: 5,
-            Unhealthy: false,
+            Healthy: true,
         }
         mergedStatus := m.mergeHealthStatuses(nil, newStatus, currentTime)
         if mergedStatus.Message != "good" {

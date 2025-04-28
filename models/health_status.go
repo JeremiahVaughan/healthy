@@ -83,7 +83,7 @@ func (m *HealthStatusModel) mergeHealthStatuses(
         UnhealthyDelayInSeconds: newStatus.UnhealthyDelayInSeconds,
         ExpiresAt: currentTime + m.healthStatusExpiresDurationInSeconds,
     }
-    if newStatus.Unhealthy {
+    if !newStatus.Healthy {
         if existingStatus == nil || existingStatus.UnhealthyStartedAt == 0 {
             mergedStatus.UnhealthyStartedAt = currentTime
         } else {
@@ -101,7 +101,7 @@ func (m *HealthStatusModel) IsHealthy() (bool, error) {
         return false, fmt.Errorf("error, when fetching all health statuses for HealthStatusModel.FetchAllHealthStatuses(). Error: %v", err)
     }
     for _, r := range result {
-        if r.Unhealthy {
+        if !r.Healthy {
             return false, nil
         }
     }
@@ -124,7 +124,7 @@ func (m *HealthStatusModel) ExternalUnexpectedError(status database.HealthStatus
         StatusKey: database.ExternalUnexpectedErrorKey,
         UnhealthyStartedAt: time.Now().Unix(),
         UnhealthyDelayInSeconds: 0,
-        Unhealthy: true,
+        Healthy: false,
     }
     err := m.UpdateHealthStatus(s)
     if err != nil {
