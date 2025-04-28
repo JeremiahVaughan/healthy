@@ -6,15 +6,14 @@ import (
     "log"
     "net/http"
 
-    "github.com/JeremiahVaughan/healthy/example/config"
+    "github.com/JeremiahVaughan/jobby/config"
     "github.com/nats-io/nats.go"
 )
 
 // setup todos
 // 1. create client with New()
-// 2. Implement updateRefreshStatus function to handle individual health status refreshes. 
-// Will need to call PublishHealthStatus for each status update.
-// 3. Will need to call PublishHealthStatus for each status update on program startup.
+// 2. Implement Controller for each of your controllers. Only need to provide: Unhealthy, UnhealthyDelayInSeconds, and Message as Service, and StatusKey are known by the client during New() and Run()
+// 3. Provide all controllers to the Run() function.
 // 4. ensure all errors other than setup errors are handled through ReportUnexpectedError().
 // Assuming setup errors are the exception since the setup would include connecting to nats to report errors.
 // 5. ensure Close() is called on app cleanup
@@ -24,7 +23,17 @@ type Client struct {
     Conn *nats.Conn
     Sub *nats.Subscription
     serviceName string
-    updateRefreshStatus func(status HealthStatus) error
+    controllers map[string]Controller
+}
+
+// We grab each status asynchronously so the consuming application doesn't 
+// have to worry about checks impacting each other. For example, one check could 
+// run too long and cause other check statuses to expire. Or one check could 
+// fail and then the other checks don't run. Even though these issues are solvable
+// by the consuming application, it isn't necessary if we just ask for each status
+// update individually.
+type Controller interface {
+    GetHealthStatus() (*HealthStatus, error)
 }
 
 // one health status for each of your statuses
@@ -44,23 +53,39 @@ type HealthStatus struct {
 func New(
     config config.Nats,
     serviceName string,
-    updateRefreshStatus func(status HealthStatus) error,
 ) (*Client, error) {
     url := fmt.Sprintf("%s:%d", config.Host, config.Port)
     var err error
     var result Client
     result.serviceName = serviceName
-    result.updateRefreshStatus = updateRefreshStatus
     result.Conn, err = nats.Connect(url)
     if err != nil {
         return nil, fmt.Errorf("error, when connecting to nats service for client init. Error: %v", err)
     }
-    key := getRefreshStatusKey(serviceName)
-    result.Sub, err = result.Conn.Subscribe(key, result.handle)
-    if err != nil {
-        return nil, fmt.Errorf("error, when subscribing to refresh-all-health-statuses. Error: %v", err)
-    }
     return &result, nil
+}
+
+// Run recommend the calling application crashes the program should this fail because it would 
+// mean any new health statuses are failing to register with healthy.
+func (c *Client) Run(controllers map[string]Controller) error {
+    var err error
+    var status *HealthStatus
+    for k, con := range controllers {
+        status, err = con.GetHealthStatus()
+        if err != nil {
+            return fmt.Errorf("error, when GetHealthStatus() for Run(). Error: %v", err)
+        }
+        status.Service = c.serviceName
+        status.StatusKey = k
+        c.PublishHealthStatus(*status)    
+    }
+    c.controllers = controllers
+    key := getRefreshStatusKey(c.serviceName)
+    c.Sub, err = c.Conn.Subscribe(key, c.handle)
+    if err != nil {
+        return fmt.Errorf("error, when subscribing to refresh-all-health-statuses. Error: %v", err)
+    }
+    return nil
 }
 
 // Close call during program shutdown
@@ -115,7 +140,6 @@ func getRefreshStatusKey(serviceName string) string {
     return fmt.Sprintf("refresh-all-health-statuses:%s", serviceName) 
 }
 
-
 func (c *Client) handle(msg *nats.Msg) {
     var s HealthStatus
     err := json.Unmarshal(msg.Data, &s)
@@ -124,10 +148,20 @@ func (c *Client) handle(msg *nats.Msg) {
         c.ReportUnexpectedError(nil, err)
         return
     }
-    err = c.updateRefreshStatus(s)
+    con, ok := c.controllers[s.StatusKey]
+    if !ok {
+        err = fmt.Errorf("error, unknown status key. Key: %s", s.StatusKey)
+        c.ReportUnexpectedError(nil, err)
+        return
+    }
+    var newStatus *HealthStatus
+    newStatus, err = con.GetHealthStatus()
     if err != nil {
         err = fmt.Errorf("error, when handling refresh status for status: %s. Error: %v", s.StatusKey, err)
         c.ReportUnexpectedError(nil, err)
         return
     }
+    newStatus.Service = c.serviceName
+    newStatus.StatusKey = s.StatusKey
+    c.PublishHealthStatus(*newStatus)    
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-    "flag"
     "context"
     "log"
 
@@ -17,17 +16,8 @@ func main() {
     ctx := context.Background()
 
     log.Println("healthy is starting")
-    var configPath string
-    flag.StringVar(
-        &configPath,
-        "c",
-        "config/config.json",
-        "location of config file",
-    ) 
 
-    flag.Parse()
-
-    config, err := config.New(configPath)
+    config, err := config.New(ctx)
     if err != nil {
         log.Fatalf("error, when creating new config for main(). Error: %v", err)
     }
