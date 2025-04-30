@@ -1,6 +1,7 @@
 package views
 
 import (
+    "time"
     "net/http"
     "fmt"
 
@@ -33,13 +34,18 @@ type DashBoard struct {
     TableRows []database.HealthStatus
 }
 
-func (i *DashBoardView) Render(w http.ResponseWriter) error {
-    s, err := i.model.GetAllStatuses()
+func (v *DashBoardView) Render(w http.ResponseWriter) error {
+    s, err := v.model.GetAllStatuses()
     if err != nil {
         return fmt.Errorf("error, when GetAllStatuses() for DashBoardView.Render(). Error: %v", err)
     }
+    for i, status := range s {
+        status.UnhealthyStartedAtDisplay = v.FormatTime(status.UnhealthyStartedAt)
+        status.ExpiresAtDisplay = v.FormatTime(status.ExpiresAt)
+        s[i] = status
+    }
     d := DashBoard{
-        LocalMode: i.localMode,
+        LocalMode: v.localMode,
         TableHeaders: []string{
             "Service",
             "Status Key",
@@ -51,9 +57,16 @@ func (i *DashBoardView) Render(w http.ResponseWriter) error {
         },
         TableRows: s,
     }
-    err = i.tl.GetTemplateGroup("dash-board").ExecuteTemplate(w, "base", d)
+    err = v.tl.GetTemplateGroup("dash-board").ExecuteTemplate(w, "base", d)
     if err != nil {
         return fmt.Errorf("error, when rendering template for DashBoardView.Render(). Error: %v", err)
     }
     return nil
+}
+
+func (v *DashBoardView) FormatTime(theTime int64) string {
+    if theTime == 0 {
+        return "N/A"
+    }
+    return time.Unix(theTime, 0).Local().Format("2 Jan 2006 15:04:05 CDT")
 }

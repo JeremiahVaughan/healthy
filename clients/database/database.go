@@ -28,10 +28,12 @@ type HealthStatus struct {
     StatusKey string `json:"statusKey"`
     Healthy bool `json:"healthy"`
     UnhealthyStartedAt int64 `json:"unhealthyStartedAt"`
+    UnhealthyStartedAtDisplay string `json:"-"`
     // UnhealthyDelayInSeconds this many seconds will pass with an unhealthy status of true before status cake is triggered
     UnhealthyDelayInSeconds int64 `json:"unhealthyDelayInSeconds"` 
     Message string `json:"message"`
-    ExpiresAt int64
+    ExpiresAt int64 `json:"-"`
+    ExpiresAtDisplay string `json:"-"`
 }
 
 func (s *HealthStatus) IsValid() bool {
@@ -95,7 +97,6 @@ func (c *Client) InsertHealthStatus(status HealthStatus) error {
 }
 
 func (c *Client) UpdateHealthStatus(status HealthStatus) error {
-    log.Printf("todo remove, recording message: %v", status)
     _, err := c.conn.Exec(
         `UPDATE health_status
         SET unhealthy_started_at = ?,

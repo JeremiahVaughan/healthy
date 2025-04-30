@@ -63,7 +63,7 @@
                         </div>
                     </td>
                     <td>
-                        {{ .UnhealthyStartedAt }}
+                        {{ .UnhealthyStartedAtDisplay }}
                     </td>
                     <td>
                         {{ .UnhealthyDelayInSeconds }}
@@ -72,7 +72,7 @@
                         {{ .Message }}
                     </td>
                     <td>
-                        {{ .ExpiresAt }}
+                        {{ .ExpiresAtDisplay }}
                     </td>
                 </tr>
             {{ end }}
