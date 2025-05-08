@@ -17,7 +17,7 @@ Deploy:
 ```./deploy.sh```
 
 See logs:
-```journalctl -u healthy.service```
+```journalctl -l --no-pager -u healthy.service | less```
 
 Turn off deployed service:
 ```sudo systemctl stop healthy.service```
