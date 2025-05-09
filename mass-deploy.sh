@@ -1,13 +1,28 @@
 set -e
 
-../nats/deploy.sh $1
-../maint/deploy.sh $1
+cd ../nats
 ./deploy.sh $1
-../jobby/deploy.sh $1
+cd -
 
-../terminaltype/deploy.sh $1
+cd ../maint
+./deploy.sh $1
+cd -
 
-../soulshare/mass-deploy.sh $1
+./deploy.sh $1
 
-../haproxy/deploy.sh $1
+cd ../jobby
+./deploy.sh $1
+cd -
+
+cd ../terminaltype
+./deploy.sh $1
+cd -
+
+cd ../haproxy
+./deploy.sh $1
+cd -
+
+cd ../soulshare
+./mass-deploy.sh $1
+
 
